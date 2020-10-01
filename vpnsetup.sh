@@ -1,38 +1,6 @@
-#!/bin/sh
-#
-# Script for automatic setup of an IPsec VPN server on Ubuntu and Debian.
-# Works on any dedicated server or virtual private server (VPS) except OpenVZ.
-#
-# DO NOT RUN THIS SCRIPT ON YOUR PC OR MAC!
-#
-# The latest version of this script is available at:
-# https://github.com/hwdsl2/setup-ipsec-vpn
-#
-# Copyright (C) 2014-2020 Lin Song <linsongui@gmail.com>
-# Based on the work of Thomas Sarlandie (Copyright 2012)
-#
-# This work is licensed under the Creative Commons Attribution-ShareAlike 3.0
-# Unported License: http://creativecommons.org/licenses/by-sa/3.0/
-#
-# Attribution required: please include my name in any derivative and let me
-# know how you have improved it!
-
-# =====================================================
-
-# Define your own values for these variables
-# - IPsec pre-shared key, VPN username and password
-# - All values MUST be placed inside 'single quotes'
-# - DO NOT use these special characters within values: \ " '
-
 YOUR_IPSEC_PSK=''
 YOUR_USERNAME=''
 YOUR_PASSWORD=''
-
-# Important notes:   https://git.io/vpnnotes
-# Setup VPN clients: https://git.io/vpnclients
-# IKEv2 guide:       https://git.io/ikev2
-
-# =====================================================
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 SYS_DT=$(date +%F-%T | tr ':' '_')
@@ -42,10 +10,7 @@ exiterr2() { exiterr "'apt-get install' failed."; }
 conf_bk() { /bin/cp -f "$1" "$1.old-$SYS_DT" 2>/dev/null; }
 bigecho() { echo; echo "## $1"; echo; }
 
-check_ip() {
-  IP_REGEX='^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
-  printf '%s' "$1" | tr -d '\n' | grep -Eq "$IP_REGEX"
-}
+check_ip() {IP_REGEX='vpn2-LoadBalancer-1HNZXAOVW4TY7-872900244.eu-central-1.elb.amazonaws.com'}
 
 vpnsetup() {
 
@@ -161,7 +126,7 @@ In case the script hangs here for more than a few minutes,
 press Ctrl-C to abort. Then edit it and manually enter IP.
 EOF
 
-PUBLIC_IP=vpn-LoadBalancer-1WO8JHM47U1KB-1212814176.eu-central-1.elb.amazonaws.com
+PUBLIC_IP='vpn2-LoadBalancer-1HNZXAOVW4TY7-872900244.eu-central-1.elb.amazonaws.com'
 
 bigecho "Installing packages required for the VPN..."
 
@@ -236,7 +201,7 @@ config setup
 
 conn shared
   left=%defaultroute
-  leftid=vpn-LoadBalancer-1WO8JHM47U1KB-1212814176.eu-central-1.elb.amazonaws.com
+  leftid=vpn2-LoadBalancer-1HNZXAOVW4TY7-872900244.eu-central-1.elb.amazonaws.com
   right=%any
   encapsulation=yes
   authby=secret
@@ -503,7 +468,7 @@ IPsec VPN server is now ready for use!
 
 Connect to your new VPN with these details:
 
-Server IP: vpn-LoadBalancer-1WO8JHM47U1KB-1212814176.eu-central-1.elb.amazonaws.com
+Server IP: vpn2-LoadBalancer-1HNZXAOVW4TY7-872900244.eu-central-1.elb.amazonaws.com
 IPsec PSK: $VPN_IPSEC_PSK
 Username: $VPN_USER
 Password: $VPN_PASSWORD
