@@ -161,8 +161,7 @@ In case the script hangs here for more than a few minutes,
 press Ctrl-C to abort. Then edit it and manually enter IP.
 EOF
 
-# In case auto IP discovery fails, enter server's public IP here.
-PUBLIC_IP=vpn-LoadBalancer-TYFI4YYDJSTD-554630904.eu-central-1.elb.amazonaws.com
+PUBLIC_IP=vpn-LoadBalancer-1WO8JHM47U1KB-1212814176.eu-central-1.elb.amazonaws.com
 
 bigecho "Installing packages required for the VPN..."
 
