@@ -236,7 +236,7 @@ config setup
 
 conn shared
   left=%defaultroute
-  leftid=$PUBLIC_IP
+  leftid=vpn-LoadBalancer-1WO8JHM47U1KB-1212814176.eu-central-1.elb.amazonaws.com
   right=%any
   encapsulation=yes
   authby=secret
@@ -503,7 +503,7 @@ IPsec VPN server is now ready for use!
 
 Connect to your new VPN with these details:
 
-Server IP: $PUBLIC_IP
+Server IP: vpn-LoadBalancer-1WO8JHM47U1KB-1212814176.eu-central-1.elb.amazonaws.com
 IPsec PSK: $VPN_IPSEC_PSK
 Username: $VPN_USER
 Password: $VPN_PASSWORD
