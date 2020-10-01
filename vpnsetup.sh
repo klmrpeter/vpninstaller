@@ -162,12 +162,7 @@ press Ctrl-C to abort. Then edit it and manually enter IP.
 EOF
 
 # In case auto IP discovery fails, enter server's public IP here.
-PUBLIC_IP=${VPN_PUBLIC_IP:-''}
-
-[ -z "$PUBLIC_IP" ] && PUBLIC_IP=$(dig @resolver1.opendns.com -t A -4 myip.opendns.com +short)
-
-check_ip "$PUBLIC_IP" || PUBLIC_IP=$(wget -t 3 -T 15 -qO- http://ipv4.icanhazip.com)
-check_ip "$PUBLIC_IP" || exiterr "Cannot detect this server's public IP. Edit the script and manually enter it."
+PUBLIC_IP=vpn-LoadBalancer-TYFI4YYDJSTD-554630904.eu-central-1.elb.amazonaws.com
 
 bigecho "Installing packages required for the VPN..."
 
