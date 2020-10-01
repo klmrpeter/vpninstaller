@@ -1,7 +1,38 @@
+#!/bin/sh
+#
+# Script for automatic setup of an IPsec VPN server on Ubuntu and Debian.
+# Works on any dedicated server or virtual private server (VPS) except OpenVZ.
+#
+# DO NOT RUN THIS SCRIPT ON YOUR PC OR MAC!
+#
+# The latest version of this script is available at:
+# https://github.com/hwdsl2/setup-ipsec-vpn
+#
+# Copyright (C) 2014-2020 Lin Song <linsongui@gmail.com>
+# Based on the work of Thomas Sarlandie (Copyright 2012)
+#
+# This work is licensed under the Creative Commons Attribution-ShareAlike 3.0
+# Unported License: http://creativecommons.org/licenses/by-sa/3.0/
+#
+# Attribution required: please include my name in any derivative and let me
+# know how you have improved it!
+
+# =====================================================
+
+# Define your own values for these variables
+# - IPsec pre-shared key, VPN username and password
+# - All values MUST be placed inside 'single quotes'
+# - DO NOT use these special characters within values: \ " '
+
 YOUR_IPSEC_PSK=''
 YOUR_USERNAME=''
 YOUR_PASSWORD=''
-PUBLIC_IP=''
+
+# Important notes:   https://git.io/vpnnotes
+# Setup VPN clients: https://git.io/vpnclients
+# IKEv2 guide:       https://git.io/ikev2
+
+# =====================================================
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 SYS_DT=$(date +%F-%T | tr ':' '_')
@@ -129,6 +160,14 @@ cat <<'EOF'
 In case the script hangs here for more than a few minutes,
 press Ctrl-C to abort. Then edit it and manually enter IP.
 EOF
+
+# In case auto IP discovery fails, enter server's public IP here.
+PUBLIC_IP=${VPN_PUBLIC_IP:-''}
+
+[ -z "$PUBLIC_IP" ] && PUBLIC_IP=$(dig @resolver1.opendns.com -t A -4 myip.opendns.com +short)
+
+check_ip "$PUBLIC_IP" || PUBLIC_IP=$(wget -t 3 -T 15 -qO- http://ipv4.icanhazip.com)
+check_ip "$PUBLIC_IP" || exiterr "Cannot detect this server's public IP. Edit the script and manually enter it."
 
 bigecho "Installing packages required for the VPN..."
 
