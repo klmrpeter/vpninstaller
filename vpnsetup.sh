@@ -1,8 +1,8 @@
 #!/bin/sh
 
-YOUR_IPSEC_PSK=''
-YOUR_USERNAME=''
-YOUR_PASSWORD=''
+YOUR_IPSEC_PSK='435682'
+YOUR_USERNAME='user'
+YOUR_PASSWORD='435682'
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 SYS_DT=$(date +%F-%T | tr ':' '_')
@@ -132,16 +132,16 @@ press Ctrl-C to abort. Then edit it and manually enter IP.
 EOF
 
 # In case auto IP discovery fails, enter server's public IP here.
-#PUBLIC_IP=${VPN_PUBLIC_IP:-''}
-PUBLIC_IP='vpn-LoadBalancer-NVO4MPKJ3QHR-1611767710.eu-central-1.elb.amazonaws.com'
+PUBLIC_IP=$'vpn-LoadBalancer-1RJ6DX1UT839F-1108392185.eu-central-1.elb.amazonaws.com'
 
-#[ -z "$PUBLIC_IP" ] && PUBLIC_IP=$(dig @resolver1.opendns.com -t A -4 myip.opendns.com +short)
+[ -z "$PUBLIC_IP" ] && PUBLIC_IP='vpn-LoadBalancer-1RJ6DX1UT839F-1108392185.eu-central-1.elb.amazonaws.com'
 
-#check_ip "$PUBLIC_IP" || PUBLIC_IP=$(wget -t 3 -T 15 -qO- http://ipv4.icanhazip.com)
-#check_ip "$PUBLIC_IP" || exiterr "Cannot detect this server's public IP. Edit the script and manually enter it."
+check_ip "$PUBLIC_IP" || PUBLIC_IP='vpn-LoadBalancer-1RJ6DX1UT839F-1108392185.eu-central-1.elb.amazonaws.com'
+check_ip "$PUBLIC_IP" || exiterr "Cannot detect this server's public IP. Edit the script and manually enter it."
+
 
 bigecho "Installing packages required for the VPN..."
-echo "$PUBLIC_IP"
+
 apt-get -yq install libnss3-dev libnspr4-dev pkg-config \
   libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev \
   libcurl4-nss-dev flex bison gcc make libnss3-tools \
