@@ -1,3 +1,5 @@
+#!/bin/sh
+
 YOUR_IPSEC_PSK=''
 YOUR_USERNAME=''
 YOUR_PASSWORD=''
@@ -10,7 +12,10 @@ exiterr2() { exiterr "'apt-get install' failed."; }
 conf_bk() { /bin/cp -f "$1" "$1.old-$SYS_DT" 2>/dev/null; }
 bigecho() { echo; echo "## $1"; echo; }
 
-check_ip() {IP_REGEX='vpn2-LoadBalancer-1HNZXAOVW4TY7-872900244.eu-central-1.elb.amazonaws.com'}
+check_ip() {
+  IP_REGEX='^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
+  printf '%s' "$1" | tr -d '\n' | grep -Eq "$IP_REGEX"
+}
 
 vpnsetup() {
 
@@ -126,10 +131,17 @@ In case the script hangs here for more than a few minutes,
 press Ctrl-C to abort. Then edit it and manually enter IP.
 EOF
 
-PUBLIC_IP='vpn2-LoadBalancer-1HNZXAOVW4TY7-872900244.eu-central-1.elb.amazonaws.com'
+# In case auto IP discovery fails, enter server's public IP here.
+#PUBLIC_IP=${VPN_PUBLIC_IP:-''}
+PUBLIC_IP='vpn-LoadBalancer-NVO4MPKJ3QHR-1611767710.eu-central-1.elb.amazonaws.com'
+
+#[ -z "$PUBLIC_IP" ] && PUBLIC_IP=$(dig @resolver1.opendns.com -t A -4 myip.opendns.com +short)
+
+#check_ip "$PUBLIC_IP" || PUBLIC_IP=$(wget -t 3 -T 15 -qO- http://ipv4.icanhazip.com)
+#check_ip "$PUBLIC_IP" || exiterr "Cannot detect this server's public IP. Edit the script and manually enter it."
 
 bigecho "Installing packages required for the VPN..."
-
+echo "$PUBLIC_IP"
 apt-get -yq install libnss3-dev libnspr4-dev pkg-config \
   libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev \
   libcurl4-nss-dev flex bison gcc make libnss3-tools \
@@ -192,16 +204,14 @@ DNS_SRVS="\"$DNS_SRV1 $DNS_SRV2\""
 conf_bk "/etc/ipsec.conf"
 cat > /etc/ipsec.conf <<EOF
 version 2.0
-
 config setup
   virtual-private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:!$L2TP_NET,%v4:!$XAUTH_NET
   protostack=netkey
   interfaces=%defaultroute
   uniqueids=no
-
 conn shared
   left=%defaultroute
-  leftid=vpn2-LoadBalancer-1HNZXAOVW4TY7-872900244.eu-central-1.elb.amazonaws.com
+  leftid=$PUBLIC_IP
   right=%any
   encapsulation=yes
   authby=secret
@@ -215,7 +225,6 @@ conn shared
   ike=aes256-sha2,aes128-sha2,aes256-sha1,aes128-sha1,aes256-sha2;modp1024,aes128-sha1;modp1024
   phase2alg=aes_gcm-null,aes128-sha1,aes256-sha1,aes256-sha2_512,aes128-sha2,aes256-sha2
   sha2-truncbug=no
-
 conn l2tp-psk
   auto=add
   leftprotoport=17/1701
@@ -223,7 +232,6 @@ conn l2tp-psk
   type=transport
   phase2=esp
   also=shared
-
 conn xauth-psk
   auto=add
   leftsubnet=0.0.0.0/0
@@ -238,7 +246,6 @@ conn xauth-psk
   ike-frag=yes
   cisco-unity=yes
   also=shared
-
 include /etc/ipsec.d/*.conf
 EOF
 
@@ -259,7 +266,6 @@ conf_bk "/etc/xl2tpd/xl2tpd.conf"
 cat > /etc/xl2tpd/xl2tpd.conf <<EOF
 [global]
 port = 1701
-
 [lns default]
 ip range = $L2TP_POOL
 local ip = $L2TP_LOCAL
@@ -318,13 +324,11 @@ if ! grep -qs "hwdsl2 VPN script" /etc/sysctl.conf; then
     SHM_ALL=268435456
   fi
 cat >> /etc/sysctl.conf <<EOF
-
 # Added by hwdsl2 VPN script
 kernel.msgmnb = 65536
 kernel.msgmax = 65536
 kernel.shmmax = $SHM_MAX
 kernel.shmall = $SHM_ALL
-
 net.ipv4.ip_forward = 1
 net.ipv4.conf.all.accept_source_route = 0
 net.ipv4.conf.all.accept_redirects = 0
@@ -336,7 +340,6 @@ net.ipv4.conf.default.send_redirects = 0
 net.ipv4.conf.default.rp_filter = 0
 net.ipv4.conf.$NET_IFACE.send_redirects = 0
 net.ipv4.conf.$NET_IFACE.rp_filter = 0
-
 net.core.wmem_max = 12582912
 net.core.rmem_max = 12582912
 net.ipv4.tcp_rmem = 10240 87380 12582912
@@ -407,17 +410,13 @@ cat > /etc/systemd/system/load-iptables-rules.service <<'EOF'
 [Unit]
 Description = Load /etc/iptables.rules
 DefaultDependencies=no
-
 Before=network-pre.target
 Wants=network-pre.target
-
 Wants=systemd-modules-load.service local-fs.target
 After=systemd-modules-load.service local-fs.target
-
 [Service]
 Type=oneshot
 ExecStart=/etc/network/if-pre-up.d/iptablesload
-
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -438,7 +437,6 @@ if ! grep -qs "hwdsl2 VPN script" /etc/rc.local; then
     echo '#!/bin/sh' > /etc/rc.local
   fi
 cat >> /etc/rc.local <<'EOF'
-
 # Added by hwdsl2 VPN script
 (sleep 15
 service ipsec restart
@@ -461,26 +459,18 @@ service ipsec restart 2>/dev/null
 service xl2tpd restart 2>/dev/null
 
 cat <<EOF
-
 ================================================
-
 IPsec VPN server is now ready for use!
-
 Connect to your new VPN with these details:
-
-Server IP: vpn2-LoadBalancer-1HNZXAOVW4TY7-872900244.eu-central-1.elb.amazonaws.com
+Server IP: $PUBLIC_IP
 IPsec PSK: $VPN_IPSEC_PSK
 Username: $VPN_USER
 Password: $VPN_PASSWORD
-
 Write these down. You'll need them to connect!
-
 Important notes:   https://git.io/vpnnotes
 Setup VPN clients: https://git.io/vpnclients
 IKEv2 guide:       https://git.io/ikev2
-
 ================================================
-
 EOF
 
 }
@@ -489,3 +479,4 @@ EOF
 vpnsetup "$@"
 
 exit 0
+@letoams
