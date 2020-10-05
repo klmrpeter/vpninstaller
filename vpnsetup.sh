@@ -132,11 +132,11 @@ press Ctrl-C to abort. Then edit it and manually enter IP.
 EOF
 
 # In case auto IP discovery fails, enter server's public IP here.
-PUBLIC_IP=$'vpn-LoadBalancer-1RJ6DX1UT839F-1108392185.eu-central-1.elb.amazonaws.com'
+PUBLIC_IP=$'vpn-LoadBalancer-1UCETGNVQPI75-1906436318.eu-central-1.elb.amazonaws.com'
 
-[ -z "$PUBLIC_IP" ] && PUBLIC_IP='vpn-LoadBalancer-1RJ6DX1UT839F-1108392185.eu-central-1.elb.amazonaws.com'
+[ -z "$PUBLIC_IP" ] && PUBLIC_IP='vpn-LoadBalancer-1UCETGNVQPI75-1906436318.eu-central-1.elb.amazonaws.com'
 
-check_ip "$PUBLIC_IP" || PUBLIC_IP='vpn-LoadBalancer-1RJ6DX1UT839F-1108392185.eu-central-1.elb.amazonaws.com'
+check_ip "$PUBLIC_IP" || PUBLIC_IP='vpn-LoadBalancer-1UCETGNVQPI75-1906436318.eu-central-1.elb.amazonaws.com'
 check_ip "$PUBLIC_IP" || exiterr "Cannot detect this server's public IP. Edit the script and manually enter it."
 
 
