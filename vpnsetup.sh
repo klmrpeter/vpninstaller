@@ -12,11 +12,6 @@ exiterr2() { exiterr "'apt-get install' failed."; }
 conf_bk() { /bin/cp -f "$1" "$1.old-$SYS_DT" 2>/dev/null; }
 bigecho() { echo; echo "## $1"; echo; }
 
-check_ip() {
-  IP_REGEX='^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
-  printf '%s' "$1" | tr -d '\n' | grep -Eq "$IP_REGEX"
-}
-
 vpnsetup() {
 
 os_type=$(lsb_release -si 2>/dev/null)
@@ -136,8 +131,6 @@ PUBLIC_IP=$'vpn-LoadBalancer-1UCETGNVQPI75-1906436318.eu-central-1.elb.amazonaws
 
 [ -z "$PUBLIC_IP" ] && PUBLIC_IP='vpn-LoadBalancer-1UCETGNVQPI75-1906436318.eu-central-1.elb.amazonaws.com'
 
-check_ip "$PUBLIC_IP" || PUBLIC_IP='vpn-LoadBalancer-1UCETGNVQPI75-1906436318.eu-central-1.elb.amazonaws.com'
-check_ip "$PUBLIC_IP" || exiterr "Cannot detect this server's public IP. Edit the script and manually enter it."
 
 
 bigecho "Installing packages required for the VPN..."
