@@ -3,6 +3,7 @@
 YOUR_IPSEC_PSK='435682'
 YOUR_USERNAME='user'
 YOUR_PASSWORD='435682'
+PUBLIC_IP='vpn-LoadBalancer-1UCETGNVQPI75-1906436318.eu-central-1.elb.amazonaws.com'
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 SYS_DT=$(date +%F-%T | tr ':' '_')
@@ -82,11 +83,6 @@ case "$VPN_IPSEC_PSK $VPN_USER $VPN_PASSWORD" in
     ;;
 esac
 
-if { [ -n "$VPN_DNS_SRV1" ] && ! check_ip "$VPN_DNS_SRV1"; } \
-  || { [ -n "$VPN_DNS_SRV2" ] && ! check_ip "$VPN_DNS_SRV2"; } then
-  exiterr "The DNS server specified is invalid."
-fi
-
 if [ -x /sbin/iptables ] && ! iptables -nL INPUT >/dev/null 2>&1; then
   exiterr "IPTables check failed. Reboot and re-run this script."
 fi
@@ -125,13 +121,6 @@ cat <<'EOF'
 In case the script hangs here for more than a few minutes,
 press Ctrl-C to abort. Then edit it and manually enter IP.
 EOF
-
-# In case auto IP discovery fails, enter server's public IP here.
-PUBLIC_IP=$'vpn-LoadBalancer-1UCETGNVQPI75-1906436318.eu-central-1.elb.amazonaws.com'
-
-[ -z "$PUBLIC_IP" ] && PUBLIC_IP='vpn-LoadBalancer-1UCETGNVQPI75-1906436318.eu-central-1.elb.amazonaws.com'
-
-
 
 bigecho "Installing packages required for the VPN..."
 
